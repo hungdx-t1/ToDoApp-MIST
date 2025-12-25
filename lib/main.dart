@@ -57,14 +57,66 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 0,
 
           actions: [
+            // 1. Nút Tìm kiếm
             IconButton(
-              icon: const Icon(Icons.category, color: Colors.black), // Icon quản lý danh mục
-              tooltip: "Quản lý danh mục",
+              icon: const Icon(Icons.search, color: Colors.black),
+              tooltip: "Tìm kiếm",
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CategoryManagementScreen()),
-                );
+                // Gọi giao diện tìm kiếm chuẩn của Flutter
+                showSearch(context: context, delegate: TaskSearchDelegate());
+              },
+            ),
+
+            // 2. Nút Sắp xếp
+            IconButton(
+              icon: const Icon(Icons.sort, color: Colors.black),
+              tooltip: "Sắp xếp",
+              onPressed: () {
+                _showSortOptions(context);
+              },
+            ),
+
+            // 3. Nút Menu 3 chấm (Popup Menu)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: Colors.black),
+              onSelected: (value) {
+                if (value == 'category') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CategoryManagementScreen()),
+                  );
+                } else if (value == 'settings') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                return [
+                  // Mục 1: Quản lý danh mục
+                  const PopupMenuItem<String>(
+                    value: 'category',
+                    child: Row(
+                      children: [
+                        Icon(Icons.category_outlined, color: Colors.black54),
+                        SizedBox(width: 10),
+                        Text('Quản lý danh mục'),
+                      ],
+                    ),
+                  ),
+                  // Mục 2: Cài đặt
+                  const PopupMenuItem<String>(
+                    value: 'settings',
+                    child: Row(
+                      children: [
+                        Icon(Icons.settings_outlined, color: Colors.black54),
+                        SizedBox(width: 10),
+                        Text('Cài đặt'),
+                      ],
+                    ),
+                  ),
+                ];
               },
             ),
           ],
@@ -178,5 +230,93 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  // Hàm hiển thị tùy chọn sắp xếp (BottomSheet)
+  void _showSortOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Sắp xếp theo", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              ListTile(
+                leading: const Icon(Icons.access_time),
+                title: const Text("Thời gian bắt đầu (Mới nhất)"),
+                onTap: () {
+                  // TODO: Gọi ViewModel để sort
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: const Text("Hạn chót (Gấp nhất)"),
+                onTap: () {
+                  // TODO: Gọi ViewModel để sort
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.sort_by_alpha),
+                title: const Text("Tên công việc (A-Z)"),
+                onTap: () {
+                  // TODO: Gọi ViewModel để sort
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Lớp xử lý Tìm kiếm (Delegate)
+class TaskSearchDelegate extends SearchDelegate {
+  @override
+  String? get searchFieldLabel => 'Tìm kiếm công việc...';
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = ''; // Xóa text tìm kiếm
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null); // Đóng màn hình tìm kiếm
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // Logic hiển thị kết quả khi nhấn Enter
+    return Center(child: Text("Kết quả cho: $query"));
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // Logic hiển thị gợi ý khi đang gõ
+    // Bạn có thể kết nối với ViewModel để filter list task tại đây
+    return Container();
   }
 }
