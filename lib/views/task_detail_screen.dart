@@ -16,7 +16,7 @@ class TaskDetailScreen extends StatelessWidget {
 
     Color catColor = Colors.blue;
     if (category != null) {
-      catColor = Color(int.parse(category.hexColor.replaceFirst('#', '0xff'))); // NPE
+      catColor = Color(int.parse(category.hexColor.replaceFirst('#', '0xff')));
     }
 
     return Scaffold(

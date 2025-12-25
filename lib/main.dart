@@ -5,6 +5,7 @@ import 'view_models/task_view_model.dart';
 import 'views/add_task_screen.dart';
 import 'views/task_detail_screen.dart';
 import 'views/category_management_screen.dart';
+import 'views/settings_screen.dart';
 import 'models/task_model.dart';
 
 void main() {

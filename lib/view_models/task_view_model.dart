@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/task_model.dart';
 import '../models/category_model.dart';
 import '../data/database_helper.dart';
@@ -81,8 +87,6 @@ class TaskViewModel extends ChangeNotifier {
   // xóa danh mục
   Future<void> deleteCategory(int id) async {
     await DatabaseHelper.instance.deleteCategory(id);
-    // Vì DB có ON DELETE CASCADE, các task sẽ tự mất trong DB.
-    // Ta chỉ cần load lại dữ liệu để ViewModel cập nhật list _tasks và _categories mới.
     await loadData();
   }
 
@@ -94,5 +98,80 @@ class TaskViewModel extends ChangeNotifier {
   // đếm số task đã hoàn thành trong 1 danh mục
   int getCompletedTasksByCategory(int catId) {
     return _tasks.where((t) => t.categoryId == catId && t.isCompleted).length;
+  }
+
+  // xuất file json
+  Future<void> exportToJson() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      // a. Gom dữ liệu thành Map
+      final data = {
+        'version': 1, // Đánh dấu phiên bản backup
+        'timestamp': DateTime.now().toIso8601String(),
+        'categories': _categories.map((c) => c.toMap()).toList(),
+        'tasks': _tasks.map((t) => t.toMap()).toList(),
+      };
+
+      // b. Chuyển sang chuỗi JSON
+      final jsonString = jsonEncode(data);
+
+      // c. Lưu vào file tạm
+      final directory = await getTemporaryDirectory();
+      final file = File('${directory.path}/todo_backup_${DateTime.now().millisecondsSinceEpoch}.json');
+      await file.writeAsString(jsonString);
+
+      // d. Gọi hộp thoại chia sẻ (Share Sheet)
+      // Người dùng có thể chọn lưu vào Drive, gửi Zalo, hoặc Lưu vào Tệp
+      await Share.shareXFiles([XFile(file.path)], text: 'Sao lưu dữ liệu Pro Todo');
+
+    } catch (e) {
+      debugPrint("Lỗi Export: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 2. nhập file JSON
+  Future<bool> importFromJson() async {
+    try {
+      // a. Mở trình chọn file
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'], // Chỉ cho chọn file .json
+      );
+
+      if (result != null) {
+        _isLoading = true;
+        notifyListeners();
+
+        File file = File(result.files.single.path!);
+        String jsonString = await file.readAsString();
+
+        // b. Decode JSON
+        Map<String, dynamic> data = jsonDecode(jsonString); // dart.convert
+
+        // Kiểm tra sơ qua cấu trúc file
+        if (data.containsKey('categories') && data.containsKey('tasks')) {
+          List<Map<String, dynamic>> cats = List<Map<String, dynamic>>.from(data['categories']);
+          List<Map<String, dynamic>> tasks = List<Map<String, dynamic>>.from(data['tasks']);
+
+          // c. Gọi DatabaseHelper để restore
+          await DatabaseHelper.instance.restoreBackup(categories: cats, tasks: tasks);
+
+          // d. Load lại dữ liệu lên UI
+          await loadData();
+          return true; // Thành công
+        }
+      }
+    } catch (e) {
+      debugPrint("Lỗi Import: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false; // Thất bại
   }
 }

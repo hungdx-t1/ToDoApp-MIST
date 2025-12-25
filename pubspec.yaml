@@ -38,6 +38,9 @@ dependencies:
   # Các tiện ích khác
   intl: ^0.18.0  # Để format ngày tháng
   shared_preferences: ^2.2.0 # Để lưu cài đặt Sáng/Tối (dùng sau)
+  path_provider: ^2.0.15 # Tìm thư mục lưu file tạm
+  share_plus: ^7.2.0 # Tính năng chia sẻ file (Export)
+  file_picker: ^6.1.1 # Chọn file từ máy (Import)
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

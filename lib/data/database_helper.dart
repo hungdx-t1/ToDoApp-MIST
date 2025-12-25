@@ -79,7 +79,7 @@ class DatabaseHelper {
     return await db.delete('tasks', where: 'id = ?', whereArgs: [id]);
   }
 
-  // --- CATEGORIES ---
+  // category funcs
   Future<int> insertCategory(Category category) async {
     final db = await database;
     return await db.insert('categories', category.toMap());
@@ -94,5 +94,27 @@ class DatabaseHelper {
   Future<int> deleteCategory(int id) async {
     final db = await database;
     return await db.delete('categories', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // hàm nâng cao: xóa hết cũ và nạp dữ liệu mới (Restore)
+  Future<void> restoreBackup({required List<Map<String, dynamic>> categories, required List<Map<String, dynamic>> tasks}) async {
+    final db = await database;
+
+    // Dùng Transaction để đảm bảo an toàn: 1 là thành công hết, 2 là lỗi thì không làm gì cả
+    await db.transaction((txn) async {
+      // 1. Xóa dữ liệu cũ (Xóa tasks trước vì dính khóa ngoại)
+      await txn.delete('tasks');
+      await txn.delete('categories');
+
+      // 2. Chèn Categories
+      for (var cat in categories) {
+        await txn.insert('categories', cat);
+      }
+
+      // 3. Chèn Tasks
+      for (var task in tasks) {
+        await txn.insert('tasks', task);
+      }
+    });
   }
 }
