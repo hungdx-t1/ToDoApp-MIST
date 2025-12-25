@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../view_models/task_view_model.dart'; // Import ViewModel
+import '../services/notification_service.dart';
+import '../view_models/task_view_model.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -72,9 +73,17 @@ class SettingsScreen extends StatelessWidget {
 
               ListTile(
                 leading: const Icon(Icons.notifications_active),
-                title: const Text("Quản lý thông báo"),
-                subtitle: const Text("Truy cập vào cài đặt ứng dụng và bật/tắt thông báo đẩy"),
-                // TODO onTap vào settings
+                title: const Text("Bật thông báo nhắc nhở"),
+                subtitle: const Text("Yêu cầu quyền gửi thông báo"),
+                trailing: const Icon(Icons.touch_app),
+                onTap: () async {
+                  await NotificationService().requestPermissions(); // Gọi hàm xin quyền
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Đã gửi yêu cầu cấp quyền!")),
+                    );
+                  }
+                },
               ),
 
               const Divider(),

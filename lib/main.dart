@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:todoapp_mist/services/notification_service.dart';
 import 'view_models/task_view_model.dart';
 import 'views/add_task_screen.dart';
 import 'views/task_detail_screen.dart';
@@ -8,8 +9,10 @@ import 'views/category_management_screen.dart';
 import 'views/settings_screen.dart';
 import 'models/task_model.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await NotificationService().init(); // khởi tạo notification
 
   runApp(
     MultiProvider(

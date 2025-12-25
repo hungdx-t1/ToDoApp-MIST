@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../models/task_model.dart';
 import '../models/category_model.dart';
 import '../data/database_helper.dart';
+import '../services/notification_service.dart';
 
 class TaskViewModel extends ChangeNotifier {
   List<Task> _tasks = [];
@@ -23,6 +24,8 @@ class TaskViewModel extends ChangeNotifier {
   List<Task> get activeTasks => _tasks.where((t) => !t.isCompleted).toList(); // Việc cần làm (Chưa xong)
   List<Task> get completedTasks => _tasks.where((t) => t.isCompleted).toList(); // Việc đã xong
   List<Task> get starredTasks => _tasks.where((t) => t.isMarkedStar).toList(); // Việc quan trọng (Có sao)
+
+  final NotificationService _notificationService = NotificationService();
 
   // Helper: Lấy thông tin Category từ ID (dùng cho UI hiển thị)
   Category? getCategoryById(int id) {
@@ -52,7 +55,17 @@ class TaskViewModel extends ChangeNotifier {
   }
 
   Future<void> addTask(Task task) async {
-    await DatabaseHelper.instance.insertTask(task);
+    // await DatabaseHelper.instance.insertTask(task);
+    int newId = await DatabaseHelper.instance.insertTask(task); // insert, đồng thời lấy id vừa tạo
+
+    // Hẹn giờ thông báo (Task ban đầu id là null, nhưng khi insert xong DB trả về ID thật)
+    await _notificationService.scheduleNotification(
+      id: newId,
+      title: 'Đã đến giờ: ${task.title}',
+      body: task.description ?? 'Hãy bắt đầu công việc ngay nhé!',
+      scheduledTime: task.startTime, // Dùng giờ bắt đầu để nhắc
+    );
+
     await loadData(); // Reload lại list
   }
 
@@ -63,6 +76,7 @@ class TaskViewModel extends ChangeNotifier {
 
   Future<void> deleteTask(int id) async {
     await DatabaseHelper.instance.deleteTask(id);
+    await _notificationService.cancelNotification(id); // Hủy thông báo
     await loadData();
   }
 
@@ -70,6 +84,18 @@ class TaskViewModel extends ChangeNotifier {
   void toggleTaskStatus(Task task) {
     task.isCompleted = !task.isCompleted;
     updateTask(task);
+    if (task.isCompleted) {
+      _notificationService.cancelNotification(task.id!); // Nếu xong rồi thì tắt thông báo đi cho đỡ phiền
+    } else {
+      _notificationService.scheduleNotification( // Nếu bỏ tick (chưa xong) thì hẹn giờ lại (nếu thời gian chưa qua)
+          id: task.id!,
+          title: task.title,
+          body: task.description ?? '',
+          scheduledTime: task.startTime
+      );
+
+      // TODO Trong trường hợp đã qua
+    }
   }
 
   void toggleTaskStar(Task task) {
@@ -124,7 +150,7 @@ class TaskViewModel extends ChangeNotifier {
 
       // d. Gọi hộp thoại chia sẻ (Share Sheet)
       // Người dùng có thể chọn lưu vào Drive, gửi Zalo, hoặc Lưu vào Tệp
-      await Share.shareXFiles([XFile(file.path)], text: 'Sao lưu dữ liệu Pro Todo'); // TODO deprecated method
+      await Share.shareXFiles([XFile(file.path)], text: 'Sao lưu dữ liệu Pro Todo'); // TODO deprecated method , 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead.
 
     } catch (e) {
       debugPrint("Lỗi Export: $e");
@@ -160,9 +186,22 @@ class TaskViewModel extends ChangeNotifier {
 
           // c. Gọi DatabaseHelper để restore
           await DatabaseHelper.instance.restoreBackup(categories: cats, tasks: tasks);
+          await _notificationService.cancelAll(); // Hủy hết thông báo cũ
 
           // d. Load lại dữ liệu lên UI
           await loadData();
+
+          for (var task in _tasks) {
+            if (!task.isCompleted) {
+              await _notificationService.scheduleNotification(
+                  id: task.id!,
+                  title: task.title,
+                  body: task.description ?? '',
+                  scheduledTime: task.startTime
+              );
+            }
+          }
+
           return true; // Thành công
         }
       }
