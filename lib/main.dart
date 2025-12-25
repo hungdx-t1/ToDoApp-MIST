@@ -1,122 +1,167 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'view_models/task_view_model.dart';
+import 'views/add_task_screen.dart';
+import 'views/task_detail_screen.dart';
+import 'models/task_model.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TaskViewModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Pro Todo',
+      theme: ThemeData(primarySwatch: Colors.blue, scaffoldBackgroundColor: Colors.grey[100]),
+      home: const HomeScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load dữ liệu khi mở app
+    Future.microtask(() => context.read<TaskViewModel>().loadData());
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return DefaultTabController(
+      length: 3, // 3 Tab
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Công việc của tôi', style: TextStyle(color: Colors.black)),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          bottom: const TabBar(
+            labelColor: Colors.blue,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Colors.blue,
+            tabs: [
+              Tab(text: 'Cần làm'),
+              Tab(text: 'Quan trọng'),
+              Tab(text: 'Đã xong'),
+            ],
+          ),
+        ),
+        body: Consumer<TaskViewModel>(
+          builder: (context, viewModel, child) {
+            if (viewModel.isLoading) return const Center(child: CircularProgressIndicator());
+
+            return TabBarView(
+              children: [
+                _buildTaskList(context, viewModel.activeTasks, viewModel),
+                _buildTaskList(context, viewModel.starredTasks, viewModel),
+                _buildTaskList(context, viewModel.completedTasks, viewModel),
+              ],
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddTaskScreen()),
+          ),
+          child: const Icon(Icons.add),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+    );
+  }
+
+  // Widget hiển thị danh sách để tái sử dụng cho 3 tab
+  Widget _buildTaskList(BuildContext context, List<Task> tasks, TaskViewModel viewModel) {
+    if (tasks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox, size: 60, color: Colors.grey[300]),
+            const SizedBox(height: 10),
+            Text('Không có công việc nào', style: TextStyle(color: Colors.grey[500])),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(10),
+      itemCount: tasks.length,
+      itemBuilder: (context, index) {
+        final task = tasks[index];
+        final category = viewModel.getCategoryById(task.categoryId);
+
+        // Convert hex string sang Color object
+        Color catColor = Colors.grey;
+        if (category != null) {
+          catColor = Color(int.parse(category.hexColor.replaceFirst('#', '0xff')));
+        }
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => TaskDetailScreen(task: task)));
+            },
+            leading: Checkbox(
+              shape: const CircleBorder(),
+              value: task.isCompleted,
+              onChanged: (val) => viewModel.toggleTaskStatus(task),
+            ),
+            title: Text(
+              task.title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                color: task.isCompleted ? Colors.grey : Colors.black,
+              ),
+            ),
+            subtitle: Row(
+              children: [
+                // Chấm màu danh mục
+                Container(width: 10, height: 10, decoration: BoxDecoration(color: catColor, shape: BoxShape.circle)),
+                const SizedBox(width: 5),
+                // Tên danh mục
+                Text(category?.name ?? 'Unknown', style: const TextStyle(fontSize: 12)),
+                const SizedBox(width: 10),
+                // Giờ bắt đầu
+                Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(DateFormat('HH:mm dd/MM').format(task.startTime), style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+            trailing: IconButton(
+              icon: Icon(
+                task.isMarkedStar ? Icons.star : Icons.star_border,
+                color: task.isMarkedStar ? Colors.amber : Colors.grey,
+              ),
+              onPressed: () => viewModel.toggleTaskStar(task),
+            ),
+          ),
+        );
+      },
     );
   }
 }
