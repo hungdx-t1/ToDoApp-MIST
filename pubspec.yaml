@@ -42,6 +42,9 @@ dependencies:
   share_plus: ^12.0.1 # Tính năng chia sẻ file (Export) (12.0.1 released on 20/10/2025)
   file_picker: ^10.3.8 # Chọn file từ máy (Import) (10.3.8 released on 18/12/2025)
 
+  flutter_local_notifications: ^19.5.0 # thông báo đẩy, dùng local (17/10/2025)
+  timezone: ^0.10.1 # support local notifi, dùng để thông báo đúng múi giờ (0.10.1 released on 28/4/2025)
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
