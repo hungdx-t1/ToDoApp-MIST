@@ -2,7 +2,7 @@ class Task {
   final int? id;
   final String title;
   final String? description;
-  final int categoryId;
+  final int categoryId; // region khóa ngoại
   final DateTime deadline;
   final DateTime startTime;
   bool isCompleted;
@@ -25,7 +25,7 @@ class Task {
       'id': id,
       'title': title,
       'description': description,
-      'categoryId': categoryId,     // Lưu ID danh mục
+      'categoryId': categoryId,
       'deadline': deadline.toIso8601String(),
       'startTime': startTime.toIso8601String(),
       'isCompleted': isCompleted ? 1 : 0,
@@ -38,7 +38,7 @@ class Task {
       id: map['id'],
       title: map['title'],
       description: map['description'],
-      categoryId: map['categoryId'], // Lấy ID danh mục
+      categoryId: map['categoryId'],
       deadline: DateTime.parse(map['deadline']),
       startTime: DateTime.parse(map['startTime']),
       isCompleted: map['isCompleted'] == 1,

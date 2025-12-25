@@ -124,7 +124,7 @@ class TaskViewModel extends ChangeNotifier {
 
       // d. Gọi hộp thoại chia sẻ (Share Sheet)
       // Người dùng có thể chọn lưu vào Drive, gửi Zalo, hoặc Lưu vào Tệp
-      await Share.shareXFiles([XFile(file.path)], text: 'Sao lưu dữ liệu Pro Todo');
+      await Share.shareXFiles([XFile(file.path)], text: 'Sao lưu dữ liệu Pro Todo'); // TODO deprecated method
 
     } catch (e) {
       debugPrint("Lỗi Export: $e");
@@ -134,7 +134,7 @@ class TaskViewModel extends ChangeNotifier {
     }
   }
 
-  // 2. nhập file JSON
+  // nhập file json
   Future<bool> importFromJson() async {
     try {
       // a. Mở trình chọn file

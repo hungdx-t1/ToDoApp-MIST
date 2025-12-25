@@ -51,7 +51,7 @@ class DatabaseHelper {
     await db.insert('categories', {'name': 'Học tập', 'hexColor': '#2196F3'}); // Xanh dương
   }
 
-  // --- TASKS ---
+  // task funcs
   Future<int> insertTask(Task task) async {
     final db = await database;
     return await db.insert('tasks', task.toMap());
@@ -59,7 +59,6 @@ class DatabaseHelper {
 
   Future<List<Task>> getTasks() async {
     final db = await database;
-    // Đã sửa 'date' thành 'startTime'
     final result = await db.query('tasks', orderBy: 'startTime DESC');
     return result.map((json) => Task.fromMap(json)).toList();
   }

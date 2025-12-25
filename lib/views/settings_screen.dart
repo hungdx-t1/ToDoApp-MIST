@@ -63,8 +63,22 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () => _confirmImport(context, viewModel),
               ),
 
-              // --- CÁC MỤC KHÁC ---
               const Divider(),
+
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text("Cài đặt thông báo", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.notifications_active),
+                title: const Text("Quản lý thông báo"),
+                subtitle: const Text("Truy cập vào cài đặt ứng dụng và bật/tắt thông báo đẩy"),
+                // TODO onTap vào settings
+              ),
+
+              const Divider(),
+
               ListTile(
                 leading: const Icon(Icons.info_outline),
                 title: const Text("Thông tin ứng dụng"),
