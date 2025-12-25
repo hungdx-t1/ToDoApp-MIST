@@ -77,4 +77,22 @@ class TaskViewModel extends ChangeNotifier {
     await DatabaseHelper.instance.insertCategory(newCat);
     await loadData(); // Load lại để update dropdown ở màn hình AddTask
   }
+
+  // xóa danh mục
+  Future<void> deleteCategory(int id) async {
+    await DatabaseHelper.instance.deleteCategory(id);
+    // Vì DB có ON DELETE CASCADE, các task sẽ tự mất trong DB.
+    // Ta chỉ cần load lại dữ liệu để ViewModel cập nhật list _tasks và _categories mới.
+    await loadData();
+  }
+
+  // đếm tổng số task trong 1 danh mục
+  int getTotalTasksByCategory(int catId) {
+    return _tasks.where((t) => t.categoryId == catId).length;
+  }
+
+  // đếm số task đã hoàn thành trong 1 danh mục
+  int getCompletedTasksByCategory(int catId) {
+    return _tasks.where((t) => t.categoryId == catId && t.isCompleted).length;
+  }
 }

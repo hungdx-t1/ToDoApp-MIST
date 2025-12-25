@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'view_models/task_view_model.dart';
 import 'views/add_task_screen.dart';
 import 'views/task_detail_screen.dart';
+import 'views/category_management_screen.dart';
 import 'models/task_model.dart';
 
 void main() {
@@ -54,6 +55,20 @@ class _HomeScreenState extends State<HomeScreen> {
           title: const Text('Công việc của tôi', style: TextStyle(color: Colors.black)),
           backgroundColor: Colors.white,
           elevation: 0,
+
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.category, color: Colors.black), // Icon quản lý danh mục
+              tooltip: "Quản lý danh mục",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CategoryManagementScreen()),
+                );
+              },
+            ),
+          ],
+
           bottom: const TabBar(
             labelColor: Colors.blue,
             unselectedLabelColor: Colors.grey,
