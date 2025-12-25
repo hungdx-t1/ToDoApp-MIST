@@ -30,6 +30,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.0.0 # Quản lý trạng thái (MVVM)
+  sqflite: ^2.0.0 # sqlite
+  path: ^1.8.0
+  flutter_colorpicker: ^1.0.3 # xử lý hex color
+
+  # Các tiện ích khác
+  intl: ^0.18.0  # Để format ngày tháng
+  shared_preferences: ^2.2.0 # Để lưu cài đặt Sáng/Tối (dùng sau)
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
