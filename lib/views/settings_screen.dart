@@ -77,11 +77,29 @@ class SettingsScreen extends StatelessWidget {
                 subtitle: const Text("Yêu cầu quyền gửi thông báo"),
                 trailing: const Icon(Icons.touch_app),
                 onTap: () async {
-                  await NotificationService().requestPermissions(); // Gọi hàm xin quyền
-                  if (context.mounted) {
+                  bool isGranted = await NotificationService().checkPermissionStatus();
+                  if (!context.mounted) return; // Kiểm tra context an toàn
+
+                  if (isGranted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Đã gửi yêu cầu cấp quyền!")),
+                      const SnackBar(
+                        content: Text("Không cần, ứng dụng đã được cấp quyền rồi!"),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 2),
+                      ),
                     );
+                  } else {
+                    await NotificationService().requestPermissions();
+
+                    // Kiểm tra lại sau khi xin (User có thể bấm Allow hoặc Deny), chỉ mang tính chất thông báo "đã gửi yêu cầu"
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Đã gửi yêu cầu cấp quyền!"),
+                          backgroundColor: Colors.blue,
+                        ),
+                      );
+                    }
                   }
                 },
               ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -34,6 +36,20 @@ class NotificationService {
         print("User clicked notification: ${response.payload}");
       },
     );
+  }
+
+  // Kiểm tra xem quyền đã được cấp hay chưa
+  Future<bool> checkPermissionStatus() async {
+    if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+      // Hàm này trả về true nếu đã được cấp quyền, false nếu chưa
+      return await androidImplementation?.areNotificationsEnabled() ?? false;
+    }
+    // Nếu là iOS (tạm thời trả về false hoặc logic riêng nếu cần)
+    return false;
   }
 
   // yêu cầu quyền (android 13+)
