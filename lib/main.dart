@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:todoapp_mist/view_models/theme_view_model.dart';
 import 'services/notification_service.dart';
 import 'utils/task_search_delegate.dart';
 import 'view_models/task_view_model.dart';
@@ -21,6 +22,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => TaskViewModel()),
+        ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const MyApp(),
     ),
@@ -31,10 +33,52 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pro Todo',
-      theme: ThemeData(primarySwatch: Colors.blue, scaffoldBackgroundColor: Colors.grey[100]),
-      home: const HomeScreen(),
+    // return MaterialApp(
+    //   title: 'Pro Todo',
+    //   theme: ThemeData(primarySwatch: Colors.blue, scaffoldBackgroundColor: Colors.grey[100]),
+    //   home: const HomeScreen(),
+    // );
+
+    return Consumer<ThemeViewModel>( // consumer có tác dụng lắng nghe thay đổi theme
+      builder: (context, themeViewModel, child) {
+        return MaterialApp(
+          title: 'Pro Todo',
+          debugShowCheckedModeBanner: false,
+
+          // theme configuration
+          themeMode: themeViewModel.isDarkMode ? ThemeMode.dark : ThemeMode.light, // hiện tại
+
+          // bộ màu cho gd sáng
+          theme: ThemeData(
+            brightness: Brightness.light,
+            primarySwatch: Colors.blue,
+            scaffoldBackgroundColor: Colors.grey[100],
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black, // Màu chữ/icon AppBar
+              elevation: 0,
+            ),
+            cardColor: Colors.white,
+            // TODO thêm các style khác (có thể)
+          ),
+
+          // bộ màu cho gd tối
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            primarySwatch: Colors.blue,
+            scaffoldBackgroundColor: const Color(0xFF121212), // nền tối
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF1E1E1E), // appbar tối hơn nền chút
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            cardColor: const Color(0xFF1E1E1E), // thẻ card màu tối
+            // Màu chữ tự động chuyển sang trắng
+          ),
+
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }
@@ -59,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
       length: 3, // 3 Tab
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Công việc của tôi', style: TextStyle(color: Colors.black)),
+         // title: const Text('Công việc của tôi', style: TextStyle(color: Colors.black)),
+          title: const Text('Công việc của tôi'),
           backgroundColor: Colors.white,
           elevation: 0,
 

@@ -4,18 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/notification_service.dart';
 import '../view_models/task_view_model.dart';
+import '../view_models/theme_view_model.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeViewModel = context.watch<ThemeViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Cài đặt"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        // backgroundColor: Colors.white,
+        // foregroundColor: Colors.black,
+        // elevation: 0,
       ),
       body: Consumer<TaskViewModel>(
         builder: (context, viewModel, child) {
@@ -31,12 +34,14 @@ class SettingsScreen extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text("Giao diện", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
               ),
+
               SwitchListTile(
                 title: const Text("Giao diện tối (Dark Mode)"),
                 subtitle: const Text("Chuyển đổi giao diện sáng/tối"),
-                value: false,
+                secondary: const Icon(Icons.dark_mode),
+                value: themeViewModel.isDarkMode,
                 onChanged: (val) {
-                  // TODO: Xử lý logic dark mode
+                  context.read<ThemeViewModel>().toggleTheme(val);
                 },
               ),
 

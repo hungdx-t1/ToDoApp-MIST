@@ -112,7 +112,7 @@ class CategoryManagementScreen extends StatelessWidget {
         content: Text.rich(
           TextSpan(
             text: "Bạn có chắc muốn xóa danh mục ",
-            style: const TextStyle(color: Colors.black),
+            // style: const TextStyle(color: Colors.black),
             children: [
               TextSpan(
                   text: "${category.name}?\n\n",
