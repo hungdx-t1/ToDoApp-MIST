@@ -1,3 +1,5 @@
+// lib/data/database_helper.dart
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/category_model.dart';

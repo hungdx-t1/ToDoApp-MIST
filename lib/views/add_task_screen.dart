@@ -79,6 +79,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return;
     }
 
+    // validate thời gian
+    if (_startTime.isAfter(_deadline)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lỗi: Thời gian bắt đầu phải trước Hạn chót!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // Lấy ViewModel
     final viewModel = context.read<TaskViewModel>();
 
