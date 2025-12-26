@@ -1,8 +1,11 @@
+// lib/views/task_detail_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/task_model.dart';
 import '../view_models/task_view_model.dart';
+import 'add_task_screen.dart';
 
 class TaskDetailScreen extends StatelessWidget {
   final Task task;
@@ -12,6 +15,17 @@ class TaskDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<TaskViewModel>();
+
+    // lấy task mới nhất từ list (để UI tự update khi sửa xong)
+    Task currentTask;
+    try {
+      // Tìm task trong list của ViewModel trùng ID với task được truyền vào
+      currentTask = viewModel.tasks.firstWhere((t) => t.id == task.id);
+    } catch (e) {
+      // Task bị xóa khi đang xem, fallback về task cũ (hiếm xảy ra)
+      currentTask = task;
+    }
+
     final category = viewModel.getCategoryById(task.categoryId);
 
     Color catColor = Colors.blue;
@@ -24,7 +38,20 @@ class TaskDetailScreen extends StatelessWidget {
         title: const Text("Chi tiết"),
         actions: [
           IconButton(
+            icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+            tooltip: "Chỉnh sửa",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddTaskScreen(taskToEdit: currentTask),
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
+            tooltip: "Xóa",
             onPressed: () {
               // Logic xóa task
               viewModel.deleteTask(task.id!);
@@ -53,7 +80,7 @@ class TaskDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 15),
 
-            // Title
+            // Title (Dùng currentTask để hiện tên mới nhất)
             Text(task.title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
 
             const SizedBox(height: 25),

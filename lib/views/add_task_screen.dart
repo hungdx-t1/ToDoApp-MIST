@@ -1,3 +1,5 @@
+// lib/views/add_task_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -5,7 +7,9 @@ import '../models/task_model.dart';
 import '../view_models/task_view_model.dart';
 
 class AddTaskScreen extends StatefulWidget {
-  const AddTaskScreen({super.key});
+  final Task? taskToEdit;
+
+  const AddTaskScreen({super.key, this.taskToEdit});
 
   @override
   State<AddTaskScreen> createState() => _AddTaskScreenState();
@@ -22,10 +26,22 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   void initState() {
     super.initState();
-    // Mặc định chọn category đầu tiên nếu list không rỗng
-    final viewModel = context.read<TaskViewModel>();
-    if (viewModel.categories.isNotEmpty) {
-      _selectedCategoryId = viewModel.categories.first.id;
+
+    // kiểm tra chế độ sửa
+    if (widget.taskToEdit != null) {
+      // Nếu là sửa, điền dữ liệu cũ vào form
+      final t = widget.taskToEdit!;
+      _titleController.text = t.title;
+      _descController.text = t.description ?? '';
+      _selectedCategoryId = t.categoryId;
+      _startTime = t.startTime;
+      _deadline = t.deadline;
+    } else {
+      // Nếu là thêm mới, lấy category mặc định
+      final viewModel = context.read<TaskViewModel>();
+      if (viewModel.categories.isNotEmpty) {
+        _selectedCategoryId = viewModel.categories.first.id;
+      }
     }
   }
 
@@ -33,16 +49,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   Future<void> _pickDateTime(bool isStart) async {
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: isStart ? _startTime : _deadline, // UX: focus vào ngày hiện tại của task
+      firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
     if (date == null) return;
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: TimeOfDay.fromDateTime(isStart ? _startTime : _deadline),
     );
+
     if (time == null) return;
 
     final result = DateTime(date.year, date.month, date.day, time.hour, time.minute);
@@ -62,15 +79,33 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return;
     }
 
-    final newTask = Task(
-      title: _titleController.text,
-      description: _descController.text,
-      categoryId: _selectedCategoryId!, // Lưu ID
-      startTime: _startTime,
-      deadline: _deadline,
-    );
+    // Lấy ViewModel
+    final viewModel = context.read<TaskViewModel>();
 
-    context.read<TaskViewModel>().addTask(newTask);
+    if (widget.taskToEdit == null) {
+      final newTask = Task( // thêm mới
+        title: _titleController.text,
+        description: _descController.text,
+        categoryId: _selectedCategoryId!,
+        startTime: _startTime,
+        deadline: _deadline,
+      );
+      viewModel.addTask(newTask);
+    } else {
+      // chỉnh sửa: giữ nguyên ID, trạng thái hoàn thành, sao... chỉ sửa nội dung
+      final updatedTask = Task(
+        id: widget.taskToEdit!.id, // phải giữ ID cũ
+        title: _titleController.text,
+        description: _descController.text,
+        categoryId: _selectedCategoryId!,
+        startTime: _startTime,
+        deadline: _deadline,
+        isCompleted: widget.taskToEdit!.isCompleted,
+        isMarkedStar: widget.taskToEdit!.isMarkedStar,
+      );
+      viewModel.updateTask(updatedTask);
+    }
+
     Navigator.pop(context);
   }
 
@@ -100,7 +135,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final categories = context.watch<TaskViewModel>().categories;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Thêm công việc'), backgroundColor: Colors.white, foregroundColor: Colors.black, elevation: 0),
+      appBar: AppBar(
+          title: Text(widget.taskToEdit == null ? 'Thêm công việc' : 'Sửa công việc'),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -177,7 +217,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: _saveTask,
-                child: const Text('Lưu công việc'),
+                child: Text(widget.taskToEdit == null ? 'Lưu công việc' : 'Cập nhật'),
               ),
             ),
           ],
