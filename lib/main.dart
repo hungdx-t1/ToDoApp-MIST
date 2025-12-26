@@ -70,7 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: "Tìm kiếm",
               onPressed: () {
                 // Gọi giao diện tìm kiếm chuẩn của Flutter
-                showSearch(context: context, delegate: TaskSearchDelegate());
+                showSearch(
+                    context: context,
+                    delegate: TaskSearchDelegate(context.read<TaskViewModel>())
+                );
               },
             ),
 
@@ -241,6 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Hàm hiển thị tùy chọn sắp xếp (BottomSheet)
   void _showSortOptions(BuildContext context) {
+    // Lấy viewModel nhưng không listen (listen=false) vì chỉ gọi hàm
+    final viewModel = Provider.of<TaskViewModel>(context, listen: false);
+    final currentOption = viewModel.currentSortOption;
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -255,30 +262,38 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Text("Sắp xếp theo", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
+
               ListTile(
                 leading: const Icon(Icons.access_time),
                 title: const Text("Thời gian bắt đầu (Mới nhất)"),
+                // Hiển thị dấu tick nếu đang chọn mục này
+                trailing: currentOption == SortOption.startTimeNewest ? const Icon(Icons.check, color: Colors.blue) : null,
                 onTap: () {
-                  // TODO: Gọi ViewModel để sort
-                  Navigator.pop(context);
+                  viewModel.setSortOption(SortOption.startTimeNewest);
+                  Navigator.pop(context); // Đóng BottomSheet
                 },
               ),
+
               ListTile(
                 leading: const Icon(Icons.flag_outlined),
                 title: const Text("Hạn chót (Gấp nhất)"),
+                trailing: currentOption == SortOption.deadlineUrgent ? const Icon(Icons.check, color: Colors.blue) : null,
                 onTap: () {
-                  // TODO: Gọi ViewModel để sort
+                  viewModel.setSortOption(SortOption.deadlineUrgent);
                   Navigator.pop(context);
                 },
               ),
+
               ListTile(
                 leading: const Icon(Icons.sort_by_alpha),
                 title: const Text("Tên công việc (A-Z)"),
+                trailing: currentOption == SortOption.titleAZ ? const Icon(Icons.check, color: Colors.blue) : null,
                 onTap: () {
-                  // TODO: Gọi ViewModel để sort
+                  viewModel.setSortOption(SortOption.titleAZ);
                   Navigator.pop(context);
                 },
               ),
+
             ],
           ),
         );

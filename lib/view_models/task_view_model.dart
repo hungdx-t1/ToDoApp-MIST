@@ -12,22 +12,63 @@ import '../models/category_model.dart';
 import '../data/database_helper.dart';
 import '../services/notification_service.dart';
 
+enum SortOption {
+  startTimeNewest, // Mới nhất (Mặc định)
+  deadlineUrgent,  // Hạn chót gấp nhất
+  titleAZ,         // Tên A-Z
+}
+
 class TaskViewModel extends ChangeNotifier {
   List<Task> _tasks = [];
   List<Category> _categories = [];
   bool _isLoading = false;
 
+  SortOption _currentSortOption = SortOption.startTimeNewest;
+  final NotificationService _notificationService = NotificationService();
+
   // Getters
   List<Task> get tasks => _tasks;
   List<Category> get categories => _categories;
   bool get isLoading => _isLoading;
+  SortOption get currentSortOption => _currentSortOption;
 
   // logic filters (lọc dữ liệu)
-  List<Task> get activeTasks => _tasks.where((t) => !t.isCompleted).toList(); // Việc cần làm (Chưa xong)
-  List<Task> get completedTasks => _tasks.where((t) => t.isCompleted).toList(); // Việc đã xong
-  List<Task> get starredTasks => _tasks.where((t) => t.isMarkedStar).toList(); // Việc quan trọng (Có sao)
+  List<Task> get activeTasks {
+    List<Task> list = _tasks.where((t) => !t.isCompleted).toList();
+    _applySort(list);
+    return list;
+  }
 
-  final NotificationService _notificationService = NotificationService();
+  List<Task> get completedTasks {
+    List<Task> list = _tasks.where((t) => t.isCompleted).toList();
+    _applySort(list);
+    return list;
+  }
+
+  List<Task> get starredTasks {
+    List<Task> list = _tasks.where((t) => t.isMarkedStar).toList();
+    _applySort(list);
+    return list;
+  }
+
+  void _applySort(List<Task> list) {
+    switch (_currentSortOption) {
+      case SortOption.startTimeNewest:
+        list.sort((a, b) => b.startTime.compareTo(a.startTime)); // Giảm dần theo thời gian bắt đầu (Mới nhất lên đầu)
+        break;
+      case SortOption.deadlineUrgent:
+        list.sort((a, b) => a.deadline.compareTo(b.deadline)); // Tăng dần theo deadline (Hạn chót gần nhất lên đầu)
+        break;
+      case SortOption.titleAZ:
+        list.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase())); // A-Z theo tên
+        break;
+    }
+  }
+
+  void setSortOption(SortOption option) {
+    _currentSortOption = option;
+    notifyListeners(); // Báo cho UI vẽ lại danh sách
+  }
 
   // Helper: Lấy thông tin Category từ ID (dùng cho UI hiển thị)
   Category? getCategoryById(int id) {
