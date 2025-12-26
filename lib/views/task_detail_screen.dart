@@ -53,9 +53,9 @@ class TaskDetailScreen extends StatelessWidget {
             icon: const Icon(Icons.delete_outline, color: Colors.red),
             tooltip: "Xóa",
             onPressed: () {
-              // Logic xóa task
-              viewModel.deleteTask(task.id!);
-              Navigator.pop(context);
+              // viewModel.deleteTask(task.id!);
+              // Navigator.pop(context);
+              _confirmDelete(context, viewModel, currentTask);
             },
           )
         ],
@@ -104,6 +104,29 @@ class TaskDetailScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // dialog xác nhận xóa công việc
+  void _confirmDelete(BuildContext context, TaskViewModel viewModel, Task task) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Xóa công việc"),
+          content: const Text("Bạn có chắc muốn xóa công việc này không?"),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Hủy")),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                viewModel.deleteTask(task.id!);
+                Navigator.pop(ctx); // Tắt dialog
+                Navigator.pop(context); // Thoát màn hình chi tiết
+              },
+              child: const Text("Xóa", style: TextStyle(color: Colors.white)),
+            )
+          ],
+        )
     );
   }
 
