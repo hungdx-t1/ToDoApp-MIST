@@ -37,7 +37,7 @@ dependencies:
 
   # Các tiện ích khác
   intl: ^0.20.2   # Để format ngày tháng (0.20.2 released on 24/1/2025)
-  shared_preferences: ^2.2.0 # Để lưu cài đặt Sáng/Tối (dùng sau)
+  shared_preferences: ^2.2.0 # Để lưu cài đặt Sáng/Tối
   path_provider: ^2.0.15 # Tìm thư mục lưu file tạm
   share_plus: ^12.0.1 # Tính năng chia sẻ file (Export) (12.0.1 released on 20/10/2025)
   file_picker: ^10.3.8 # Chọn file từ máy (Import) (10.3.8 released on 18/12/2025)
