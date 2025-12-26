@@ -105,8 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
          // title: const Text('Công việc của tôi', style: TextStyle(color: Colors.black)),
           title: const Text('Công việc của tôi'),
-          backgroundColor: Colors.white,
-          elevation: 0,
+          // backgroundColor: Colors.white,
+          // elevation: 0,
 
           actions: [
             // 1. Nút Tìm kiếm

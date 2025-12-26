@@ -17,9 +17,9 @@ class CategoryManagementScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Quản lý danh mục"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        // backgroundColor: Colors.white,
+        // foregroundColor: Colors.black,
+        // elevation: 0,
       ),
       body: categories.isEmpty
           ? const Center(child: Text("Chưa có danh mục nào"))
@@ -136,7 +136,8 @@ class CategoryManagementScreen extends StatelessWidget {
               context.read<TaskViewModel>().deleteCategory(category.id!);
               Navigator.pop(ctx);
             },
-            child: const Text("Xóa luôn", style: TextStyle(color: Colors.white)),
+            // child: const Text("Xóa luôn", style: TextStyle(color: Colors.white)),
+            child: const Text("Xóa luôn"),
           ),
         ],
       ),

@@ -153,6 +153,7 @@ class SettingsScreen extends StatelessWidget {
                 );
               }
             },
+            // child: const Text("Đồng ý nhập"),
             child: const Text("Đồng ý nhập", style: TextStyle(color: Colors.white)),
           ),
         ],

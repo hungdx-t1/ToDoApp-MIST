@@ -148,9 +148,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     return Scaffold(
       appBar: AppBar(
           title: Text(widget.taskToEdit == null ? 'Thêm công việc' : 'Sửa công việc'),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 0
+          // backgroundColor: Colors.white,
+          // foregroundColor: Colors.black,
+          // elevation: 0
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

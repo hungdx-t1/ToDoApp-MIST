@@ -123,7 +123,8 @@ class TaskDetailScreen extends StatelessWidget {
                 Navigator.pop(ctx); // Tắt dialog
                 Navigator.pop(context); // Thoát màn hình chi tiết
               },
-              child: const Text("Xóa", style: TextStyle(color: Colors.white)),
+              // child: const Text("Xóa", style: TextStyle(color: Colors.white)),
+              child: const Text("Xóa"),
             )
           ],
         )
