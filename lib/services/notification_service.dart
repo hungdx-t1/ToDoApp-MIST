@@ -78,24 +78,39 @@ class NotificationService {
     required String body,
     required DateTime scheduledTime,
   }) async {
-    if (scheduledTime.isBefore(DateTime.now())) return; // Nếu thời gian đã qua thì không hẹn nữa
+    final now = DateTime.now();
+
+    // nếu thời gian đã qua quá lâu (hơn 2 phút trước) thì bỏ qua
+    if (scheduledTime.isBefore(now.subtract(const Duration(minutes: 2)))) {
+      return;
+    }
+
+    // xử lý delay: nếu thời gian hẹn nhỏ hơn hoặc bằng hiện tại (do trễ vài giây lúc bấm nút Lưu)
+    // -> Cộng thêm 5 giây để thông báo nổ ngay lập tức -> fix thông báo không hiện.
+    DateTime finalTime = scheduledTime;
+    if (scheduledTime.isBefore(now.add(const Duration(seconds: 1)))) {
+      finalTime = now.add(const Duration(seconds: 5));
+    }
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local), // Chuyển đổi giờ
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'todo_channel_id',
-          'Nhắc nhở công việc',
-          channelDescription: 'Thông báo nhắc nhở khi đến giờ làm việc',
-          importance: Importance.max,
-          priority: Priority.high,
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(finalTime, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'todo_channel_id',
+            'Nhắc nhở công việc',
+            channelDescription: 'Thông báo nhắc nhở khi đến giờ làm việc',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
     );
+
+    print("Đã đặt lịch thông báo lúc: $finalTime"); // In log để kiểm tra
   }
 
   // 4. hủy thông báo (Khi xóa task hoặc hoàn thành sớm)
