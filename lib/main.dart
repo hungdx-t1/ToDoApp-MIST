@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             // 1. Nút Tìm kiếm
             IconButton(
-              icon: const Icon(Icons.search, color: Colors.black),
+              icon: const Icon(Icons.search),
               tooltip: "Tìm kiếm",
               onPressed: () {
                 // Gọi giao diện tìm kiếm chuẩn của Flutter
@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // 2. Nút Sắp xếp
             IconButton(
-              icon: const Icon(Icons.sort, color: Colors.black),
+              icon: const Icon(Icons.sort),
               tooltip: "Sắp xếp",
               onPressed: () {
                 _showSortOptions(context);
@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // 3. Nút Menu 3 chấm (Popup Menu)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: Colors.black),
+              icon: const Icon(Icons.more_vert),
               onSelected: (value) {
                 if (value == 'category') {
                   Navigator.push(
@@ -154,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: 'category',
                     child: Row(
                       children: [
-                        Icon(Icons.category_outlined, color: Colors.black54),
+                        Icon(Icons.category_outlined),
                         SizedBox(width: 10),
                         Text('Quản lý danh mục'),
                       ],
@@ -165,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: 'settings',
                     child: Row(
                       children: [
-                        Icon(Icons.settings_outlined, color: Colors.black54),
+                        Icon(Icons.settings_outlined),
                         SizedBox(width: 10),
                         Text('Cài đặt'),
                       ],
@@ -257,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                color: task.isCompleted ? Colors.grey : Colors.black,
+                color: task.isCompleted ? Colors.grey : null,
               ),
             ),
             subtitle: Row(
