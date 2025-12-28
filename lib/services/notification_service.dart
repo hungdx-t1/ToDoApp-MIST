@@ -1,8 +1,8 @@
 // lib/services/notification_service.dart
-
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -17,6 +17,14 @@ class NotificationService {
   // init method
   Future<void> init() async {
     tz.initializeTimeZones(); // Cấu hình múi giờ
+    try {
+      final TimezoneInfo localTimezone = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(localTimezone.identifier));
+      print("Đã cập nhật múi giờ thành công: ${localTimezone.identifier}");
+    } catch (e) {
+      print("Lỗi lấy múi giờ: $e. Dùng mặc định Asia/Ho_Chi_Minh");
+      tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
+    }
 
     // Icon mặc định cho Android (cần file app_icon.png hoặc ic_launcher trong folder drawable)
     // '@mipmap/ic_launcher' là icon mặc định của Flutter app
