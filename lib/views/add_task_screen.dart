@@ -1,5 +1,6 @@
 // lib/views/add_task_screen.dart
 
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -122,23 +123,88 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   }
 
-  // Hàm hiển thị dialog thêm category mới (như cũ, nhưng update cho đúng logic mới)
   void _showAddCategoryDialog() {
     final nameController = TextEditingController();
+    Color pickerColor = const Color(0xff2196f3); // Màu mặc định (Blue)
+
     showDialog(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text("Thêm danh mục"),
-          content: TextField(controller: nameController, decoration: const InputDecoration(hintText: "Tên danh mục")),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Hủy")),
-            ElevatedButton(onPressed: () {
-              // Mặc định màu đỏ cho demo, bạn có thể làm color picker sau
-              context.read<TaskViewModel>().addCategory(nameController.text, "#FF5722");
-              Navigator.pop(ctx);
-            }, child: const Text("Thêm"))
-          ],
-        )
+        builder: (ctx) {
+          // Dùng StatefulBuilder để cập nhật UI trong Dialog nếu cần
+          // (mặc dù BlockPicker tự handle state nhưng bọc lại cho chắc chắn nếu muốn mở rộng)
+          return AlertDialog(
+            title: const Text("Thêm danh mục"),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                          hintText: "Tên danh mục",
+                          labelText: "Tên danh mục",
+                          border: OutlineInputBorder()
+                      )
+                  ),
+                  const SizedBox(height: 20),
+                  const Text("Chọn màu sắc:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+
+                  // Widget chọn màu dạng khối (gọn gàng cho mobile)
+                  BlockPicker(
+                    pickerColor: pickerColor,
+                    availableColors: const [
+                      Colors.red, Colors.pink, Colors.purple, Colors.deepPurple,
+                      Colors.indigo, Colors.blue, Colors.lightBlue, Colors.cyan,
+                      Colors.teal, Colors.green, Colors.lightGreen, Colors.lime,
+                      Colors.yellow, Colors.amber, Colors.orange, Colors.deepOrange,
+                      Colors.brown, Colors.grey, Colors.blueGrey, Colors.black,
+                    ],
+                    layoutBuilder: (context, colors, child) {
+                      // Tùy chỉnh layout cho nhỏ gọn hơn (nếu cần)
+                      return SizedBox(
+                        width: 300,
+                        height: 200,
+                        child: GridView.count(
+                          crossAxisCount: 5, // 5 cột
+                          crossAxisSpacing: 5,
+                          mainAxisSpacing: 5,
+                          children: colors.map((Color color) => child(color)).toList(),
+                        ),
+                      );
+                    },
+                    onColorChanged: (Color color) {
+                      pickerColor = color;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text("Hủy")
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    if (nameController.text.trim().isEmpty) {
+                      return; // Không làm gì nếu tên rỗng
+                    }
+
+                    // Chuyển Color sang mã Hex String (#RRGGBB)
+                    String hexString = '#${pickerColor.value.toRadixString(16).substring(2).toUpperCase()}';
+
+                    // Gọi ViewModel thêm mới
+                    context.read<TaskViewModel>().addCategory(nameController.text, hexString);
+
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text("Thêm")
+              )
+            ],
+          );
+        }
     );
   }
 
