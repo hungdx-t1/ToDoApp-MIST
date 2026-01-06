@@ -102,12 +102,16 @@ class TaskViewModel extends ChangeNotifier {
     int newId = await DatabaseHelper.instance.insertTask(task); // insert, đồng thời lấy id vừa tạo
 
     // Hẹn giờ thông báo (Task ban đầu id là null, nhưng khi insert xong DB trả về ID thật)
-    await _notificationService.scheduleNotification(
-      id: newId,
-      title: 'Đã đến giờ: ${task.title}',
-      body: task.description ?? 'Hãy bắt đầu công việc ngay nhé!',
-      scheduledTime: task.startTime, // Dùng giờ bắt đầu để nhắc
-    );
+    try {
+      await _notificationService.scheduleNotification(
+        id: newId,
+        title: 'Đã đến giờ: ${task.title}',
+        body: task.description ?? 'Hãy bắt đầu công việc ngay nhé!',
+        scheduledTime: task.startTime,
+      );
+    } catch (e) {
+      debugPrint("Lỗi hẹn giờ: $e"); // In lỗi ra để debug nếu cần
+    }
 
     await loadData(); // Reload lại list
   }
@@ -119,26 +123,37 @@ class TaskViewModel extends ChangeNotifier {
 
   Future<void> deleteTask(int id) async {
     await DatabaseHelper.instance.deleteTask(id);
-    await _notificationService.cancelNotification(id); // Hủy thông báo
+
+    try {
+      await _notificationService.cancelNotification(id);
+    } catch (e) {
+      debugPrint("Lỗi hủy thông báo: $e");
+    }
+
     await loadData();
   }
 
   // Hàm nhanh để toggle trạng thái
-  void toggleTaskStatus(Task task) {
+  void toggleTaskStatus(Task task) async {
     task.isCompleted = !task.isCompleted;
-    updateTask(task);
-    if (task.isCompleted) {
-      _notificationService.cancelNotification(task.id!); // Nếu xong rồi thì tắt thông báo đi cho đỡ phiền
-    } else {
-      _notificationService.scheduleNotification( // Nếu bỏ tick (chưa xong) thì hẹn giờ lại (nếu thời gian chưa qua)
-          id: task.id!,
-          title: task.title,
-          body: task.description ?? '',
-          scheduledTime: task.startTime
-      );
+    await DatabaseHelper.instance.updateTask(task);
 
-      // TODO Trong trường hợp đã qua
+    try {
+      if (task.isCompleted) {
+        await _notificationService.cancelNotification(task.id!);
+      } else {
+        await _notificationService.scheduleNotification(
+            id: task.id!,
+            title: task.title,
+            body: task.description ?? '',
+            scheduledTime: task.startTime
+        );
+      }
+    } catch (e) {
+      debugPrint("Lỗi cập nhật thông báo: $e");
     }
+
+    await loadData();
   }
 
   void toggleTaskStar(Task task) {

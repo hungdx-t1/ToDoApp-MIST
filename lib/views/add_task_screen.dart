@@ -117,7 +117,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       viewModel.updateTask(updatedTask);
     }
 
-    Navigator.pop(context);
+    if (context.mounted) { // Chỉ đóng màn hình khi đã xử lý xong
+      Navigator.pop(context);
+    }
   }
 
   // Hàm hiển thị dialog thêm category mới (như cũ, nhưng update cho đúng logic mới)
