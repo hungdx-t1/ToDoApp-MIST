@@ -1,6 +1,7 @@
 // lib/services/notification_service.dart
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -113,13 +114,39 @@ class NotificationService {
     print("Đã đặt lịch thông báo lúc: $finalTime"); // In log để kiểm tra
   }
 
-  // 4. hủy thông báo (Khi xóa task hoặc hoàn thành sớm)
+  // hủy thông báo (Khi xóa task hoặc hoàn thành sớm)
   Future<void> cancelNotification(int id) async {
     await flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  // 5. hủy tất cả (dùng khi restore backup)
+  // hủy tất cả (dùng khi restore backup)
   Future<void> cancelAll() async {
     await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  // hiển thị thông báo từ Firebase khi app đang mở
+  Future<void> showRemoteNotification(RemoteMessage message) async {
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+
+    // Nếu tin nhắn có chứa nội dung thông báo
+    if (notification != null && android != null) {
+      await flutterLocalNotificationsPlugin.show(
+        notification.hashCode, // ID ngẫu nhiên dựa trên nội dung
+        notification.title,
+        notification.body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'todo_channel_id', // Phải trùng với ID kênh bạn đã tạo
+            'Nhắc nhở công việc',
+            channelDescription: 'Thông báo từ hệ thống',
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher', // Icon app
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+      );
+    }
   }
 }

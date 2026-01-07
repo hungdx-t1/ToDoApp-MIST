@@ -1,5 +1,7 @@
 // lib/main.dart
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -13,8 +15,20 @@ import 'views/category_management_screen.dart';
 import 'views/settings_screen.dart';
 import 'models/task_model.dart';
 
+// Hàm xử lý khi App đang TẮT hoặc chạy ngầm (Background)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Nhận thông báo ngầm: ${message.messageId}"); // Ở chế độ này, Android tự hiện thông báo, không cần gọi LocalNotification
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
+
+  // Đăng ký hàm xử lý ngầm
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await NotificationService().init(); // khởi tạo notification
 
@@ -95,6 +109,16 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Load dữ liệu khi mở app
     Future.microtask(() => context.read<TaskViewModel>().loadData());
+
+    // listen khi app đang mở (FOREGROUND)
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Nhận tin nhắn khi app đang mở: ${message.notification?.title}');
+
+      // Nếu có thông báo, gọi LocalNotification để hiện lên
+      if (message.notification != null) {
+        NotificationService().showRemoteNotification(message);
+      }
+    });
   }
 
   @override
