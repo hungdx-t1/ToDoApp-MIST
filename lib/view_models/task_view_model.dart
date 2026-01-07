@@ -199,7 +199,8 @@ class TaskViewModel extends ChangeNotifier {
       };
 
       // b. Chuyển sang chuỗi JSON
-      final jsonString = jsonEncode(data);
+      // final jsonString = jsonEncode(data);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(data);
 
       // c. Lưu vào file tạm
       final directory = await getTemporaryDirectory();
