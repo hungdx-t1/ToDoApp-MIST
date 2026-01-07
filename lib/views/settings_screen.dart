@@ -29,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
 
           return ListView(
             children: [
-              // --- PHẦN GIAO DIỆN ---
+              // --- phần giao diện ---
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text("Giao diện", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),

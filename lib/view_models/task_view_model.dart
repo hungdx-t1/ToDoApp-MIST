@@ -165,7 +165,7 @@ class TaskViewModel extends ChangeNotifier {
   Future<void> addCategory(String name, String hexColor) async {
     final newCat = Category(name: name, hexColor: hexColor);
     await DatabaseHelper.instance.insertCategory(newCat);
-    await loadData(); // Load lại để update dropdown ở màn hình AddTask
+    await loadData();
   }
 
   // xóa danh mục
@@ -249,15 +249,19 @@ class TaskViewModel extends ChangeNotifier {
           // d. Load lại dữ liệu lên UI
           await loadData();
 
-          for (var task in _tasks) {
-            if (!task.isCompleted) {
-              await _notificationService.scheduleNotification(
-                  id: task.id!,
-                  title: task.title,
-                  body: task.description ?? '',
-                  scheduledTime: task.startTime
-              );
+          try {
+            for (var task in _tasks) {
+              if (!task.isCompleted) {
+                await _notificationService.scheduleNotification(
+                    id: task.id!,
+                    title: task.title,
+                    body: task.description ?? '',
+                    scheduledTime: task.startTime
+                );
+              }
             }
+          } catch (e) {
+            debugPrint("Không thể lên lịch thông báo hàng loạt!: $e");
           }
 
           return true; // Thành công
