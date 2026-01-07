@@ -6,12 +6,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Cú pháp Kotlin DSL dùng ngoặc đơn và ngoặc kép
-        classpath("com.android.tools.build:gradle:8.6.0")
-
-        // Bạn cũng nên có Kotlin Plugin ở đây (nếu chưa cấu hình ở chỗ khác)
-        // Phiên bản Kotlin nên tương thích (ví dụ 1.9.0 hoặc mới hơn)
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
+        classpath("com.android.tools.build:gradle:8.13.2")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.0")
+        classpath("com.google.gms:google-services:4.4.3")
     }
 }
 

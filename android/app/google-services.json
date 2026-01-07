@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "273591754922",
+    "project_id": "todoapp-mist",
+    "storage_bucket": "todoapp-mist.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:273591754922:android:eb84efecae166f3d73f0d3",
+        "android_client_info": {
+          "package_name": "pika.hungd1.tx.todoapp_mist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6Zobg17lC0qa-gWeoNid8q4ao2RWmdow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
